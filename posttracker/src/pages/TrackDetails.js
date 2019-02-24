@@ -2,25 +2,25 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import PackageUpdate from '../components/PackageUpdate';
 import moment from 'moment';
+import config from '../config';
 
 const TrackDetails = props => {
     const {
         trackDetails: { data }
     } = props.navigation.state.params;
-    const FORMAT_DATE = 'DD/MM/YYYY HH:mm';
-
+    const { DATE_FORMAT } = config;
     return (
         <View style={styles.container}>
             <View>
                 <Text style={styles.title}>Posted at:</Text>
                 <Text style={styles.value}>
-                    {moment.utc(new Date(data.postedAt)).format(FORMAT_DATE)}
+                    {moment.utc(new Date(data.postedAt)).format(DATE_FORMAT)}
                 </Text>
             </View>
             <View>
                 <Text style={styles.title}>Last update:</Text>
                 <Text style={styles.value}>
-                    {moment.utc(new Date(data.updatedAt)).format(FORMAT_DATE)}
+                    {moment.utc(new Date(data.updatedAt)).format(DATE_FORMAT)}
                 </Text>
             </View>
             <View>

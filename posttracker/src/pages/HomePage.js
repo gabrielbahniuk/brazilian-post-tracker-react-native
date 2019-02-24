@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
-import api from '../services/api';
+
+import Packet from '../components/Packet';
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet
+    StyleSheet,
+    AsyncStorage,
+    FlatList,
+    Dimensions
 } from 'react-native';
 import Reactotron from 'reactotron-react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 // import styles from './styles';
 
 console.tron = Reactotron.configure()
@@ -15,30 +20,37 @@ console.tron = Reactotron.configure()
     .connect();
 
 export default class HomePage extends Component {
-    state = {
-        trackCode: '',
-        trackDetails: {}
-    };
-
     static navigationOptions = () => ({
         title: 'Package Tracker'
     });
+    state = {
+        trackCode: '',
+        trackedPackages: [],
+        trackDetails: {}
+    };
 
-    handleSearch = async () => {
+    async componentDidMount() {
+        const packages = JSON.parse(
+            await AsyncStorage.getItem('@posttracker:trackcodeList')
+        );
+        if (!packages) return;
+
+        await this.setState({ trackedPackages: packages });
+    }
+
+    handleAddPackage = async () => {
         const { trackCode } = this.state;
 
         if (!trackCode.length) return;
 
-        const response = await api.get(`/track/${trackCode}/json`);
-
-        this.setState({ trackDetails: response.data });
-
-        const { trackDetails } = this.state;
-
-        this.props.navigation.navigate('TrackDetails', {
-            trackCode,
-            trackDetails
+        this.setState({
+            trackedPackages: [...this.state.trackedPackages, trackCode]
         });
+
+        await AsyncStorage.setItem(
+            '@posttracker:trackcodeList',
+            JSON.stringify(this.state.trackedPackages)
+        );
     };
 
     handleInputChange = trackCode => this.setState({ trackCode });
@@ -46,46 +58,75 @@ export default class HomePage extends Component {
     render() {
         return (
             <View>
-                <TextInput
-                    onChangeText={this.handleInputChange}
-                    placeholder="Inform the track code, e.g. AA100833276BR"
-                    value={this.state.trackCode}
-                    returnKeyType="send"
-                    onSubmitEditing={this.handleSearch}
-                    style={styles.input}
-                />
-                <TouchableOpacity
-                    onPress={this.handleSearch}
-                    style={styles.button}
-                >
-                    <Text style={styles.buttonText}>Search</Text>
-                </TouchableOpacity>
+                <View style={styles.container}>
+                    <TextInput
+                        onChangeText={this.handleInputChange}
+                        placeholder="Inform the track code, e.g. AA100833276BR"
+                        value={this.state.trackCode}
+                        returnKeyType="send"
+                        onSubmitEditing={this.handleAddPackage}
+                        style={styles.input}
+                    />
+                    <TouchableOpacity
+                        onPress={this.handleAddPackage}
+                        style={styles.button}
+                    >
+                        <Icon
+                            name="add-circle-outline"
+                            size={36}
+                            color="#535353"
+                        />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.containerPackages}>
+                    <Text style={styles.textTitle}>My Packages</Text>
+                    <FlatList
+                        data={this.state.trackedPackages}
+                        keyExtractor={item => item}
+                        renderItem={({ item }) => (
+                            <Packet
+                                trackCode={this.state.trackCode}
+                                navigation={this.props.navigation}
+                                trackCode={item}
+                            />
+                        )}
+                    />
+                </View>
             </View>
         );
     }
 }
 const styles = StyleSheet.create({
+    container: {
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        padding: 10,
+        marginTop: 10
+    },
     input: {
         borderWidth: 1,
         borderColor: '#DDD',
         borderRadius: 5,
         height: 44,
-        paddingHorizontal: 15,
-        alignSelf: 'stretch',
-        marginTop: 30
+        paddingHorizontal: 15
     },
     button: {
-        height: 44,
-        alignSelf: 'stretch',
-        marginTop: 10,
-        backgroundColor: '#F8CE00',
-        borderRadius: 5,
-        justifyContent: 'center',
-        alignItems: 'center'
+        minWidth: 30,
+        marginLeft: 5
     },
-    buttonText: {
-        color: '#FFF',
-        fontSize: 16,
+    containerPackages: {
+        marginTop: 10,
+        marginBottom: 5,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10
+    },
+    textTitle: {
+        color: '#535353',
+        fontSize: 22,
         fontWeight: 'bold'
     }
 });
