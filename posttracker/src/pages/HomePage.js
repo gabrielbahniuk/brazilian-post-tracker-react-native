@@ -8,8 +8,7 @@ import {
     TouchableOpacity,
     StyleSheet,
     AsyncStorage,
-    FlatList,
-    Dimensions
+    FlatList
 } from 'react-native';
 import Reactotron from 'reactotron-react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -43,7 +42,7 @@ export default class HomePage extends Component {
 
         if (!trackCode.length) return;
 
-        this.setState({
+        await this.setState({
             trackedPackages: [...this.state.trackedPackages, trackCode]
         });
 
@@ -86,7 +85,6 @@ export default class HomePage extends Component {
                         keyExtractor={item => item}
                         renderItem={({ item }) => (
                             <Packet
-                                trackCode={this.state.trackCode}
                                 navigation={this.props.navigation}
                                 trackCode={item}
                             />
