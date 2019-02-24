@@ -1,29 +1,36 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import PackageUpdate from '../components/PackageUpdate';
+import moment from 'moment';
 
 const TrackDetails = props => {
-
     const {
-        trackDetails: { data },
+        trackDetails: { data }
     } = props.navigation.state.params;
+    const FORMAT_DATE = 'DD/MM/YYYY HH:mm';
 
     return (
         <View style={styles.container}>
             <View>
-                <Text style={styles.title}>Postado em:</Text>
-                <Text style={styles.value}>{data.postedAt}</Text>
+                <Text style={styles.title}>Posted at:</Text>
+                <Text style={styles.value}>
+                    {moment.utc(new Date(data.postedAt)).format(FORMAT_DATE)}
+                </Text>
             </View>
             <View>
-                <Text style={styles.title}>Ultima atualização:</Text>
-                <Text style={styles.value}>{data.updatedAt}</Text>
+                <Text style={styles.title}>Last update:</Text>
+                <Text style={styles.value}>
+                    {moment.utc(new Date(data.updatedAt)).format(FORMAT_DATE)}
+                </Text>
             </View>
             <View>
-                <Text style={styles.title}>Entregue:</Text>
-                <Text style={styles.value}>{data.isDelivered ? "SIM" : "NÃO"}</Text>
+                <Text style={styles.title}>Delivered:</Text>
+                <Text style={styles.value}>
+                    {data.isDelivered ? 'Yes' : 'No'}
+                </Text>
             </View>
             <View>
-                <Text style={styles.title}>Histórico de atualizações</Text>
+                <Text style={styles.title}>Updates History</Text>
             </View>
 
             <FlatList
@@ -33,7 +40,7 @@ const TrackDetails = props => {
             />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -41,14 +48,14 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: 5,
-        borderColor: "#eee"
+        borderColor: '#eee'
     },
     title: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: 'bold'
     },
     value: {
-        fontSize: 14
+        fontSize: 16
     }
 });
 
